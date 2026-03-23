@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Radar Agro - Milho | Rural IN</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+        :root {
+            --primary: #E65100;
+            --primary-light: #FF6D00;
+            --primary-dark: #BF360C;
+            --accent: #FFD600;
+            --accent-dark: #FFAB00;
+            --bg-dark: #0F0D0A;
+            --bg-card: #141210;
+            --bg-card-alt: #1A1714;
+            --text-primary: #FFF8E1;
+            --text-secondary: #FFE0B2;
+            --text-muted: #8D7B6B;
+            --border: #2D2218;
+            --red: #EF5350;
+            --red-bg: rgba(239,83,80,0.1);
+            --green: #66BB6A;
+            --green-bg: rgba(102,187,106,0.1);
+            --blue: #42A5F5;
+            --orange: #FFA726;
+            --yellow: #FFD600;
+            --corn: #F9A825;
+            --corn-light: #FFD54F;
+        }
+
+        * { margin:0; padding:0; box-sizing:border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        ::-webkit-scrollbar { width:6px; }
+        ::-webkit-scrollbar-track { background:var(--bg-dark); }
+        ::-webkit-scrollbar-thumb { background:var(--primary); border-radius:3px; }
+
+        .container { max-width:1100px; margin:0 auto; padding:0 16px; }
+
+        /* HEADER */
+        .header {
+            background: linear-gradient(135deg, #1a0f00 0%, var(--primary-dark) 40%, var(--primary) 100%);
+            padding:20px 0;
+            border-bottom:3px solid var(--accent);
+            position:relative;
+            overflow:hidden;
+        }
+        .header::before {
+            content:'';
+            position:absolute;
+            top:-50%;right:-10%;
+            width:300px;height:300px;
+            background:radial-gradient(circle,rgba(255,214,0,0.12) 0%,transparent 70%);
+            border-radius:50%;
+        }
+        .header-content {
+            display:flex; align-items:center; justify-content:space-between;
+            flex-wrap:wrap; gap:16px; position:relative; z-index:1;
+        }
+        .logo-area { display:flex; align-items:center; gap:16px; }
+        .logo-placeholder {
+            width:70px;height:70px;background:white;border-radius:14px;
+            display:flex;align-items:center;justify-content:center;
+            box-shadow:0 4px 15px rgba(0,0,0,0.3); flex-shrink:0; overflow:hidden;
+        }
+        .logo-text-svg { width:100%;height:100%; }
+        .header-title h1 { font-size:1.6rem;font-weight:900;letter-spacing:-0.5px;text-shadow:0 2px 4px rgba(0,0,0,0.3); }
+        .header-title h1 span { color:var(--accent); }
+        .header-title p { font-size:0.8rem;opacity:0.85;font-weight:400;margin-top:2px; }
+        .header-badge {
+            background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.12);
+            border-radius:12px; padding:10px 18px; text-align:center; backdrop-filter:blur(10px);
+        }
+        .header-badge .date { font-size:0.75rem;opacity:0.8;text-transform:uppercase;letter-spacing:1px; }
+        .header-badge .time { font-size:1.1rem;font-weight:700;color:var(--accent); }
+
+        /* TICKER BAR */
+        .ticker-bar { background:var(--bg-card); border-bottom:1px solid var(--border); padding:12px 0; overflow:hidden; }
+        .ticker-items { display:flex; gap:32px; overflow-x:auto; scrollbar-width:none; padding:0 16px; }
+        .ticker-items::-webkit-scrollbar { display:none; }
+        .ticker-item { display:flex; align-items:center; gap:8px; white-space:nowrap; flex-shrink:0; }
+        .ticker-label { font-size:0.7rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px; font-weight:600; }
+        .ticker-value { font-family:'JetBrains Mono',monospace; font-size:0.85rem; font-weight:600; color:var(--text-primary); }
+        .ticker-var { font-family:'JetBrains Mono',monospace; font-size:0.75rem; font-weight:600; padding:2px 6px; border-radius:4px; }
+        .ticker-var.up { color:var(--green); background:var(--green-bg); }
+        .ticker-var.down { color:var(--red); background:var(--red-bg); }
+        .ticker-var.neutral { color:var(--text-muted); background:rgba(141,123,107,0.1); }
+
+        /* MAIN */
+        .main-content { padding:24px 0 40px; }
+
+        /* SECTION TITLE */
+        .section-title { display:flex; align-items:center; gap:12px; margin-bottom:20px; padding-bottom:10px; border-bottom:2px solid var(--border); }
+        .section-icon { width:36px;height:36px; background:linear-gradient(135deg,var(--primary),var(--primary-light)); border-radius:10px; display:flex;align-items:center;justify-content:center; font-size:1.1rem; flex-shrink:0; }
+        .section-title h2 { font-size:1.2rem; font-weight:700; color:var(--text-primary); }
+        .section-title h2 span { color:var(--corn); }
+
+        /* CARDS */
+        .card {
+            background:var(--bg-card); border:1px solid var(--border); border-radius:16px;
+            padding:24px; margin-bottom:20px; transition:border-color 0.3s;
+        }
+        .card:hover { border-color:var(--primary-light); }
+        .card-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; flex-wrap:wrap; gap:8px; }
+        .card-title { font-size:1rem; font-weight:700; color:var(--text-secondary); }
+
+        .badge { font-size:0.65rem; font-weight:700; padding:4px 10px; border-radius:20px; text-transform:uppercase; letter-spacing:0.5px; }
+        .badge-green { background:var(--green-bg);color:var(--green);border:1px solid rgba(102,187,106,0.3); }
+        .badge-red { background:var(--red-bg);color:var(--red);border:1px solid rgba(239,83,80,0.3); }
+        .badge-yellow { background:rgba(255,214,0,0.1);color:var(--yellow);border:1px solid rgba(255,214,0,0.3); }
+        .badge-blue { background:rgba(66,165,245,0.1);color:var(--blue);border:1px solid rgba(66,165,245,0.3); }
+        .badge-orange { background:rgba(255,167,38,0.1);color:var(--orange);border:1px solid rgba(255,167,38,0.3); }
+
+        /* PRICE HERO */
+        .price-hero {
+            background:linear-gradient(135deg,rgba(230,81,0,0.25) 0%,rgba(191,54,12,0.35) 100%);
+            border:1px solid var(--primary); border-radius:16px; padding:28px; text-align:center;
+            margin-bottom:20px; position:relative; overflow:hidden;
+        }
+        .price-hero::after { content:'🌽'; position:absolute; right:20px; top:50%; transform:translateY(-50%); font-size:5rem; opacity:0.06; }
+        .price-hero-label { font-size:0.8rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:2px; margin-bottom:8px; font-weight:600; }
+        .price-hero-value { font-family:'JetBrains Mono',monospace; font-size:3rem; font-weight:800; color:var(--corn); line-height:1; margin-bottom:6px; }
+        .price-hero-sub { font-size:0.85rem; color:var(--text-secondary); }
+        .price-hero-sub .var-up { color:var(--green);font-weight:700; }
+        .price-hero-sub .var-down { color:var(--red);font-weight:700; }
+
+        /* GRIDS */
+        .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+        .grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; }
+        .grid-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+
+        /* MINI CARD */
+        .mini-card { background:var(--bg-card-alt); border:1px solid var(--border); border-radius:12px; padding:16px; text-align:center; }
+        .mini-card-label { font-size:0.65rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px; font-weight:600; }
+        .mini-card-value { font-family:'JetBrains Mono',monospace; font-size:1.15rem; font-weight:700; color:var(--text-primary); }
+        .mini-card-var { font-size:0.7rem; font-weight:600; margin-top:4px; }
+        .mini-card-var.up { color:var(--green); }
+        .mini-card-var.down { color:var(--red); }
+
+        /* TABLE */
+        .table-responsive { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+        table { width:100%; border-collapse:collapse; font-size:0.82rem; }
+        thead th { background:var(--bg-card-alt); color:var(--text-muted); font-weight:600; text-transform:uppercase; font-size:0.65rem; letter-spacing:0.5px; padding:10px 12px; text-align:left; white-space:nowrap; border-bottom:2px solid var(--border); }
+        tbody td { padding:10px 12px; border-bottom:1px solid var(--border); font-family:'JetBrains Mono',monospace; font-size:0.8rem; white-space:nowrap; }
+        tbody tr:hover { background:rgba(230,81,0,0.06); }
+        .val-up { color:var(--green); font-weight:600; }
+        .val-down { color:var(--red); font-weight:600; }
+
+        /* CHART */
+        .chart-container { background:var(--bg-card-alt); border-radius:12px; padding:20px; margin:16px 0; }
+        .chart-container svg { width:100%; height:auto; }
+
+        /* ANALYSIS BOX */
+        .analysis-box {
+            background:linear-gradient(135deg,rgba(230,81,0,0.1) 0%,rgba(191,54,12,0.15) 100%);
+            border-left:4px solid var(--corn); border-radius:0 12px 12px 0;
+            padding:20px 24px; margin:16px 0;
+        }
+        .analysis-box h4 { color:var(--corn); font-size:0.85rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; margin-bottom:10px; }
+        .analysis-box p { color:var(--text-secondary); font-size:0.88rem; line-height:1.75; }
+
+        /* ALERT BOX */
+        .alert-box { border-radius:12px; padding:16px 20px; margin:12px 0; display:flex; align-items:flex-start; gap:12px; }
+        .alert-box.warning { background:rgba(255,167,38,0.08); border:1px solid rgba(255,167,38,0.25); }
+        .alert-box.danger { background:rgba(239,83,80,0.08); border:1px solid rgba(239,83,80,0.25); }
+        .alert-box.info { background:rgba(66,165,245,0.08); border:1px solid rgba(66,165,245,0.25); }
+        .alert-box.success { background:rgba(102,187,106,0.08); border:1px solid rgba(102,187,106,0.25); }
+        .alert-icon { font-size:1.3rem; flex-shrink:0; margin-top:2px; }
+        .alert-content { flex:1; }
+        .alert-content strong { display:block; font-size:0.82rem; margin-bottom:4px; }
+        .alert-content p { font-size:0.8rem; color:var(--text-secondary); line-height:1.6; }
+
+        /* SCENARIO CARDS */
+        .scenario-card { border-radius:14px; padding:20px; border:1px solid; margin-bottom:12px; }
+        .scenario-card.bullish { background:rgba(102,187,106,0.05); border-color:rgba(102,187,106,0.2); }
+        .scenario-card.bearish { background:rgba(239,83,80,0.05); border-color:rgba(239,83,80,0.2); }
+        .scenario-card.neutral { background:rgba(255,214,0,0.05); border-color:rgba(255,214,0,0.2); }
+        .scenario-header { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+        .scenario-prob { font-family:'JetBrains Mono',monospace; font-size:1.4rem; font-weight:800; }
+        .scenario-card.bullish .scenario-prob { color:var(--green); }
+        .scenario-card.bearish .scenario-prob { color:var(--red); }
+        .scenario-card.neutral .scenario-prob { color:var(--yellow); }
+        .scenario-label { font-size:0.9rem; font-weight:700; }
+        .scenario-desc { font-size:0.82rem; color:var(--text-secondary); line-height:1.65; }
+        .scenario-range { font-family:'JetBrains Mono',monospace; font-size:0.85rem; font-weight:700; color:var(--corn); margin-top:8px; }
+
+        /* GEO PILL */
+        .geo-pill {
+            display:inline-flex; align-items:center; gap:6px;
+            background:var(--bg-card-alt); border:1px solid var(--border);
+            border-radius:8px; padding:8px 14px; margin:4px; font-size:0.78rem;
+        }
+        .geo-pill .flag { font-size:1rem; }
+
+        /* DIVIDER */
+        .divider { height:1px; background:linear-gradient(to right,transparent,var(--border),transparent); margin:28px 0; }
+
+        /* FOOTER */
+        .footer { background:var(--bg-card); border-top:3px solid var(--primary); padding:40px 0 24px; }
+        .footer-content { display:grid; grid-template-columns:1fr 1fr; gap:32px; align-items:start; }
+        .footer-author h3 { font-size:1.1rem; font-weight:800; color:var(--corn); margin-bottom:4px; }
+        .footer-author .role { font-size:0.8rem; color:var(--green); font-weight:600; margin-bottom:2px; }
+        .footer-author .sub-role { font-size:0.75rem; color:var(--text-muted); line-height:1.5; margin-bottom:12px; }
+        .footer-contact-item { display:flex; align-items:center; gap:8px; font-size:0.78rem; color:var(--text-secondary); margin-bottom:6px; }
+        .footer-contact-item .icon { font-size:0.9rem; }
+        .footer-social { display:flex; gap:12px; margin-top:12px; }
+        .social-tag { background:var(--bg-card-alt); border:1px solid var(--border); border-radius:8px; padding:6px 12px; font-size:0.72rem; color:var(--text-secondary); font-weight:600; }
+        .footer-disclaimer { text-align:right; }
+        .footer-disclaimer p { font-size:0.68rem; color:var(--text-muted); line-height:1.7; }
+        .footer-bottom { text-align:center; margin-top:28px; padding-top:16px; border-top:1px solid var(--border); }
+        .footer-bottom p { font-size:0.68rem; color:var(--text-muted); }
+        .footer-motto { color:var(--corn)!important; font-weight:700; font-size:0.78rem!important; margin-bottom:4px; }
+
+        /* PULSE */
+        .pulse-dot { width:8px;height:8px;background:var(--corn);border-radius:50%;display:inline-block;animation:pulse 2s infinite;margin-right:6px; }
+        @keyframes pulse { 0%{box-shadow:0 0 0 0 rgba(249,168,37,0.5)} 70%{box-shadow:0 0 0 8px rgba(249,168,37,0)} 100%{box-shadow:0 0 0 0 rgba(249,168,37,0)} }
+
+        /* RESPONSIVE */
+        @media (max-width:768px) {
+            .header-content { flex-direction:column; text-align:center; }
+            .logo-area { flex-direction:column; }
+            .header-badge { width:100%; }
+            .price-hero-value { font-size:2.4rem; }
+            .grid-2,.grid-3,.grid-4 { grid-template-columns:1fr 1fr; }
+            .footer-content { grid-template-columns:1fr; text-align:center; }
+            .footer-disclaimer { text-align:center; }
+            .footer-social { justify-content:center; }
+            .card { padding:18px; }
+            .section-title h2 { font-size:1rem; }
+        }
+        @media (max-width:480px) {
+            .grid-2,.grid-3,.grid-4 { grid-template-columns:1fr; }
+            .price-hero-value { font-size:2rem; }
+            .price-hero { padding:20px; }
+            .analysis-box { padding:16px; }
+        }
+
+        .watermark { position:fixed;bottom:10px;right:10px;opacity:0.03;font-size:4rem;font-weight:900;color:var(--primary);pointer-events:none;z-index:0; }
+    </style>
+</head>
+<body>
+
+<div class="watermark">RURAL IN</div>
+
+<!-- HEADER -->
+<header class="header">
+    <div class="container">
+        <div class="header-content">
+            <div class="logo-area">
+                <div class="logo-placeholder">
+                    <svg class="logo-text-svg" viewBox="0 0 70 70" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="70" height="70" rx="14" fill="white"/>
+                        <rect x="4" y="4" width="62" height="62" rx="10" fill="#E65100"/>
+                        <text x="35" y="28" text-anchor="middle" font-family="Inter,sans-serif" font-size="12" font-weight="900" fill="#FFD600">RURAL</text>
+                        <text x="35" y="46" text-anchor="middle" font-family="Inter,sans-serif" font-size="16" font-weight="900" fill="white">IN</text>
+                        <line x1="14" y1="52" x2="56" y2="52" stroke="#FFD600" stroke-width="2"/>
+                        <text x="35" y="62" text-anchor="middle" font-family="Inter,sans-serif" font-size="6" font-weight="600" fill="#FFE0B2">INTELIGÊNCIA AGRO</text>
+                    </svg>
+                </div>
+                <div class="header-title">
+                    <h1>RADAR AGRO <span>| MILHO</span></h1>
+                    <p>Mercado de Milho — Informativo de Fechamento</p>
+                </div>
+            </div>
+            <div class="header-badge">
+                <div class="date">Segunda-feira, 23 de Março de 2026</div>
+                <div class="time">🌽 Fechamento do Dia</div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- TICKER BAR -->
+<div class="ticker-bar">
+    <div class="container">
+        <div class="ticker-items">
+            <div class="ticker-item">
+                <span class="ticker-label">CEPEA/Esalq</span>
+                <span class="ticker-value">R$ 71,25/sc</span>
+                <span class="ticker-var down">-0,17%</span>
+            </div>
+            <div class="ticker-item">
+                <span class="ticker-label">Var. Mês</span>
+                <span class="ticker-value">+2,47%</span>
+                <span class="ticker-var up">↑ Alta</span>
+            </div>
+            <div class="ticker-item">
+                <span class="ticker-label">US$/sc</span>
+                <span class="ticker-value">US$ 13,61</span>
+                <span class="ticker-var up">+1,67%</span>
+            </div>
+            <div class="ticker-item">
+                <span class="ticker-label">SP Capital</span>
+                <span class="ticker-value">R$ 71,87/sc</span>
+                <span class="ticker-var neutral">Ref.</span>
+            </div>
+            <div class="ticker-item">
+                <span class="ticker-label">Paranaguá</span>
+                <span class="ticker-value">R$ 65,00/sc</span>
+                <span class="ticker-var neutral">Porto</span>
+            </div>
+            <div class="ticker-item">
+                <span class="ticker-label">Dólar</span>
+                <span class="ticker-value">R$ 5,27</span>
+                <span class="ticker-var down">-0,75%</span>
+            </div>
+            <div class="ticker-item">
+                <span class="ticker-label">MT Sorriso</span>
+                <span class="ticker-value">R$ 42,50/sc</span>
+                <span class="ticker-var down">Mínima</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MAIN -->
+<main class="main-content">
+    <div class="container">
+
+        <!-- PREÇO DESTAQUE -->
+        <div class="price-hero">
+            <div class="price-hero-label"><span class="pulse-dot"></span>Indicador do Milho CEPEA/Esalq/B3 — 23/03/2026</div>
+            <div class="price-hero-value">R$ 71,25/sc</div>
+            <div class="price-hero-sub">
+                Var. Dia: <span class="var-down">-0,17%</span> &nbsp;|&nbsp;
+                Var. Mês: <span class="var-up">+2,47%</span> &nbsp;|&nbsp;
+                US$ 13,61/sc
+            </div>
+        </div>
+
+        <!-- GRID RESUMO -->
+        <div class="grid-4" style="margin-bottom:24px;">
+            <div class="mini-card">
+                <div class="mini-card-label">Máxima Mês</div>
+                <div class="mini-card-value">R$ 72,10</div>
+                <div class="mini-card-var" style="color:var(--corn);">16/03</div>
+            </div>
+            <div class="mini-card">
+                <div class="mini-card-label">Mínima Mês</div>
+                <div class="mini-card-value">R$ 69,98</div>
+                <div class="mini-card-var" style="color:var(--text-muted);">03/03</div>
+            </div>
+            <div class="mini-card">
+                <div class="mini-card-label">Safrinha Plantio</div>
+                <div class="mini-card-value">85,5%</div>
+                <div class="mini-card-var" style="color:var(--orange);">vs 89,6% 2025</div>
+            </div>
+            <div class="mini-card">
+                <div class="mini-card-label">Safra Verão Colh.</div>
+                <div class="mini-card-value">34%</div>
+                <div class="mini-card-var" style="color:var(--orange);">Em andamento</div>
+            </div>
+        </div>
+
+        <!-- EVOLUÇÃO CEPEA MARÇO -->
+        <div class="section-title">
+            <div class="section-icon">📈</div>
+            <h2>Indicador CEPEA/Esalq — <span>Evolução Março 2026</span></h2>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">Série Diária — Milho Campinas/SP (R$/sc 60kg)</div>
+                <span class="badge badge-blue">ANÁLISE TÉCNICA</span>
+            </div>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr><th>Data</th><th>Valor R$/sc</th><th>Var. Dia</th><th>Var. Mês</th><th>US$/sc</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td style="color:var(--corn);font-weight:700;font-family:Inter,sans-serif;">23/03</td><td>71,25</td><td class="val-down">-0,17%</td><td class="val-up">+2,47%</td><td>13,61</td></tr>
+                        <tr><td style="color:var(--text-secondary);font-family:Inter,sans-serif;">20/03</td><td>71,37</td><td class="val-down">-0,36%</td><td class="val-up">+2,65%</td><td>13,42</td></tr>
+                        <tr><td style="color:var(--text-secondary);font-family:Inter,sans-serif;">19/03</td><td>71,63</td><td class="val-up">+0,60%</td><td class="val-up">+3,02%</td><td>13,74</td></tr>
+                        <tr><td style="color:var(--text-secondary);font-family:Inter,sans-serif;">18/03</td><td>71,20</td><td class="val-down">-1,14%</td><td class="val-up">+2,40%</td><td>13,62</td></tr>
+                        <tr><td style="color:var(--text-secondary);font-family:Inter,sans-serif;">17/03</td><td>72,02</td><td class="val-down">-0,11%</td><td class="val-up">+3,58%</td><td>13,83</td></tr>
+                        <tr><td style="color:var(--text-secondary);font-family:Inter,sans-serif;">16/03</td><td>72,10</td><td class="val-up">+0,17%</td><td class="val-up">+3,70%</td><td>13,79</td></tr>
+                        <tr><td style="color:var(--text-secondary);font-family:Inter,sans-serif;">13/03</td><td>71,98</td><td class="val-up">+0,59%</td><td class="val-up">+3,52%</td><td>13,55</td></tr>
+                        <tr><td style="color:var(--text-secondary);font-family:Inter,sans-serif;">12/03</td><td>71,56</td><td class="val-up">+0,34%</td><td class="val-up">+2,92%</td><td>13,66</td></tr>
+                        <tr><td style="color:var(--text-secondary);font-family:Inter,sans-serif;">11/03</td><td>71,32</td><td class="val-up">+0,32%</td><td class="val-up">+2,57%</td><td>13,81</td></tr>
+                        <tr><td style="color:var(--text-secondary);font-family:Inter,sans-serif;">10/03</td><td>71,09</td><td class="val-up">+0,65%</td><td class="val-up">+2,24%</td><td>13,77</td></tr>
+                        <tr><td style="color:var(--text-secondary);font-family:Inter,sans-serif;">09/03</td><td>70,63</td><td class="val-up">+0,10%</td><td class="val-up">+1,58%</td><td>13,66</td></tr>
+                        <tr><td style="color:var(--text-secondary);font-family:Inter,sans-serif;">06/03</td><td>70,56</td><td class="val-up">+0,46%</td><td class="val-up">+1,48%</td><td>13,44</td></tr>
+                        <tr><td style="color:var(--text-secondary);font-family:Inter,sans-serif;">05/03</td><td>70,24</td><td class="val-up">+0,01%</td><td class="val-up">+1,02%</td><td>13,30</td></tr>
+                        <tr><td style="color:var(--text-secondary);font-family:Inter,sans-serif;">04/03</td><td>70,23</td><td class="val-up">+0,36%</td><td class="val-up">+1,01%</td><td>13,46</td></tr>
+                        <tr><td style="color:var(--text-secondary);font-family:Inter,sans-serif;">03/03</td><td>69,98</td><td class="val-up">+0,33%</td><td class="val-up">+0,65%</td><td>13,28</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- GRÁFICO PRINCIPAL -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">Gráfico — Indicador CEPEA Milho Março/2026</div>
+                <span class="badge badge-orange">GRAFISTA</span>
+            </div>
+            <div class="chart-container">
+                <svg viewBox="0 0 800 360" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="cornArea" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#F9A825" stop-opacity="0.35"/>
+                            <stop offset="100%" stop-color="#F9A825" stop-opacity="0.02"/>
+                        </linearGradient>
+                        <linearGradient id="cornLine" x1="0" y1="0" x2="1" y2="0">
+                            <stop offset="0%" stop-color="#E65100"/>
+                            <stop offset="50%" stop-color="#FF6D00"/>
+                            <stop offset="100%" stop-color="#FFD600"/>
+                        </linearGradient>
+                        <filter id="glow2">
+                            <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+                            <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                        </filter>
+                    </defs>
+
+                    <!-- Grid -->
+                    <line x1="60" y1="40" x2="760" y2="40" stroke="#2D2218" stroke-width="0.5" stroke-dasharray="4"/>
+                    <line x1="60" y1="100" x2="760" y2="100" stroke="#2D2218" stroke-width="0.5" stroke-dasharray="4"/>
+                    <line x1="60" y1="160" x2="760" y2="160" stroke="#2D2218" stroke-width="0.5" stroke-dasharray="4"/>
+                    <line x1="60" y1="220" x2="760" y2="220" stroke="#2D2218" stroke-width="0.5" stroke-dasharray="4"/>
+                    <line x1="60" y1="280" x2="760" y2="280" stroke="#2D2218" stroke-width="0.5" stroke-dasharray="4"/>
+
+                    <!-- Y axis: 69.5=y280, 72.5=y40, range=3, px/unit = 240/3 = 80 -->
+                    <text x="52" y="44" fill="#8D7B6B" font-size="10" text-anchor="end" font-family="JetBrains Mono,monospace">72,50</text>
+                    <text x="52" y="104" fill="#8D7B6B" font-size="10" text-anchor="end" font-family="JetBrains Mono,monospace">71,75</text>
+                    <text x="52" y="164" fill="#8D7B6B" font-size="10" text-anchor="end" font-family="JetBrains Mono,monospace">71,00</text>
+                    <text x="52" y="224" fill="#8D7B6B" font-size="10" text-anchor="end" font-family="JetBrains Mono,monospace">70,25</text>
+                    <text x="52" y="284" fill="#8D7B6B" font-size="10" text-anchor="end" font-family="JetBrains Mono,monospace">69,50</text>
+
+                    <!-- Calc: y = 280 - (val - 69.5) * 80
+                         03/03: 69.98 -> y = 280 - 0.48*80 = 280-38.4 = 241.6
+                         04/03: 70.23 -> y = 280 - 0.73*80 = 280-58.4 = 221.6
+                         05/03: 70.24 -> y = 280 - 0.74*80 = 280-59.2 = 220.8
+                         06/03: 70.56 -> y = 280 - 1.06*80 = 280-84.8 = 195.2
+                         09/03: 70.63 -> y = 280 - 1.13*80 = 280-90.4 = 189.6
+                         10/03: 71.09 -> y = 280 - 1.59*80 = 280-127.2 = 152.8
+                         11/03: 71.32 -> y = 280 - 1.82*80 = 280-145.6 = 134.4
+                         12/03: 71.56 -> y = 280 - 2.06*80 = 280-164.8 = 115.2
+                         13/03: 71.98 -> y = 280 - 2.48*80 = 280-198.4 = 81.6
+                         16/03: 72.10 -> y = 280 - 2.60*80 = 280-208 = 72
+                         17/03: 72.02 -> y = 280 - 2.52*80 = 280-201.6 = 78.4
+                         18/03: 71.20 -> y = 280 - 1.70*80 = 280-136 = 144
+                         19/03: 71.63 -> y = 280 - 2.13*80 = 280-170.4 = 109.6
+                         20/03: 71.37 -> y = 280 - 1.87*80 = 280-149.6 = 130.4
+                         23/03: 71.25 -> y = 280 - 1.75*80 = 280-140 = 140
+                    -->
+
+                    <!-- Area -->
+                    <polygon points="90,241.6 136,221.6 182,220.8 228,195.2 274,189.6 320,152.8 366,134.4 412,115.2 458,81.6 504,72 550,78.4 596,144 642,109.6 688,130.4 734,140 734,280 90,280" fill="url(#cornArea)"/>
+
+                    <!-- Line -->
+                    <polyline points="90,241.6 136,221.6 182,220.8 228,195.2 274,189.6 320,152.8 366,134.4 412,115.2 458,81.6 504,72 550,78.4 596,144 642,109.6 688,130.4 734,140" fill="none" stroke="url(#cornLine)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow2)"/>
+
+                    <!-- Points -->
+                    <circle cx="90" cy="241.6" r="4" fill="#E65100" stroke="#FF6D00" stroke-width="1.5"/>
+                    <circle cx="136" cy="221.6" r="3.5" fill="#E65100" stroke="#FF6D00" stroke-width="1.5"/>
+                    <circle cx="182" cy="220.8" r="3.5" fill="#E65100" stroke="#FF6D00" stroke-width="1.5"/>
+                    <circle cx="228" cy="195.2" r="3.5" fill="#E65100" stroke="#FF6D00" stroke-width="1.5"/>
+                    <circle cx="274" cy="189.6" r="3.5" fill="#E65100" stroke="#FF6D00" stroke-width="1.5"/>
+                    <circle cx="320" cy="152.8" r="3.5" fill="#FF6D00" stroke="#FFD600" stroke-width="1.5"/>
+                    <circle cx="366" cy="134.4" r="3.5" fill="#FF6D00" stroke="#FFD600" stroke-width="1.5"/>
+                    <circle cx="412" cy="115.2" r="3.5" fill="#FF6D00" stroke="#FFD600" stroke-width="1.5"/>
+                    <circle cx="458" cy="81.6" r="3.5" fill="#FF6D00" stroke="#FFD600" stroke-width="1.5"/>
+                    <circle cx="504" cy="72" r="5" fill="#66BB6A" stroke="#66BB6A" stroke-width="2"/>
+                    <circle cx="550" cy="78.4" r="3.5" fill="#FF6D00" stroke="#FFD600" stroke-width="1.5"/>
+                    <circle cx="596" cy="144" r="4" fill="#EF5350" stroke="#EF5350" stroke-width="1.5"/>
+                    <circle cx="642" cy="109.6" r="3.5" fill="#FF6D00" stroke="#FFD600" stroke-width="1.5"/>
+                    <circle cx="688" cy="130.4" r="3.5" fill="#FF6D00" stroke="#FFD600" stroke-width="1.5"/>
+                    <circle cx="734" cy="140" r="5" fill="#FFD600" stroke="#FFD600" stroke-width="2"/>
+
+                    <!-- Max annotation -->
+                    <line x1="504" y1="72" x2="504" y2="50" stroke="#66BB6A" stroke-width="0.8" stroke-dasharray="3"/>
+                    <rect x="470" y="32" width="68" height="18" rx="4" fill="rgba(102,187,106,0.15)" stroke="#66BB6A" stroke-width="0.5"/>
+                    <text x="504" y="44" text-anchor="middle" fill="#66BB6A" font-size="8" font-weight="700" font-family="JetBrains Mono,monospace">72,10 MAX</text>
+
+                    <!-- Drop annotation -->
+                    <line x1="596" y1="144" x2="596" y2="166" stroke="#EF5350" stroke-width="0.8" stroke-dasharray="3"/>
+                    <rect x="558" y="168" width="76" height="18" rx="4" fill="rgba(239,83,80,0.15)" stroke="#EF5350" stroke-width="0.5"/>
+                    <text x="596" y="180" text-anchor="middle" fill="#EF5350" font-size="8" font-weight="600" font-family="JetBrains Mono,monospace">71,20 -1,14%</text>
+
+                    <!-- Current annotation -->
+                    <line x1="734" y1="140" x2="734" y2="115" stroke="#FFD600" stroke-width="0.8" stroke-dasharray="3"/>
+                    <rect x="694" y="98" width="80" height="18" rx="4" fill="rgba(255,214,0,0.2)" stroke="#FFD600" stroke-width="0.5"/>
+                    <text x="734" y="110" text-anchor="middle" fill="#FFD600" font-size="8" font-weight="700" font-family="JetBrains Mono,monospace">71,25 HOJE</text>
+
+                    <!-- Support line 70.50 -> y = 280-(70.50-69.5)*80 = 280-80 = 200 -->
+                    <line x1="60" y1="200" x2="760" y2="200" stroke="#EF5350" stroke-width="1" stroke-dasharray="6,3" opacity="0.45"/>
+                    <text x="765" y="204" fill="#EF5350" font-size="8" font-family="JetBrains Mono,monospace" opacity="0.7">Sup. 70,50</text>
+
+                    <!-- Resistance 72.10 -> y = 280-(72.10-69.5)*80 = 280-208 = 72 -->
+                    <line x1="60" y1="72" x2="760" y2="72" stroke="#66BB6A" stroke-width="1" stroke-dasharray="6,3" opacity="0.45"/>
+                    <text x="765" y="76" fill="#66BB6A" font-size="8" font-family="JetBrains Mono,monospace" opacity="0.7">Res. 72,10</text>
+
+                    <!-- Uptrend line from 03/03 start to mid -->
+                    <line x1="90" y1="241.6" x2="504" y2="72" stroke="#FFD600" stroke-width="1.2" stroke-dasharray="8,4" opacity="0.4"/>
+
+                    <!-- X axis -->
+                    <text x="90" y="305" fill="#8D7B6B" font-size="8" text-anchor="middle" font-family="JetBrains Mono,monospace">03</text>
+                    <text x="182" y="305" fill="#8D7B6B" font-size="8" text-anchor="middle" font-family="JetBrains Mono,monospace">05</text>
+                    <text x="274" y="305" fill="#8D7B6B" font-size="8" text-anchor="middle" font-family="JetBrains Mono,monospace">09</text>
+                    <text x="366" y="305" fill="#8D7B6B" font-size="8" text-anchor="middle" font-family="JetBrains Mono,monospace">11</text>
+                    <text x="458" y="305" fill="#8D7B6B" font-size="8" text-anchor="middle" font-family="JetBrains Mono,monospace">13</text>
+                    <text x="550" y="305" fill="#8D7B6B" font-size="8" text-anchor="middle" font-family="JetBrains Mono,monospace">17</text>
+                    <text x="642" y="305" fill="#8D7B6B" font-size="8" text-anchor="middle" font-family="JetBrains Mono,monospace">19</text>
+                    <text x="734" y="305" fill="#FFD600" font-size="8" text-anchor="middle" font-weight="700" font-family="JetBrains Mono,monospace">23</text>
+                    <text x="410" y="330" fill="#8D7B6B" font-size="9" text-anchor="middle" font-family="Inter,sans-serif">Março 2026 — Dias úteis</text>
+
+                    <!-- Legend -->
+                    <rect x="80" y="15" width="8" height="3" rx="1" fill="#FF6D00"/>
+                    <text x="92" y="19" fill="#FFE0B2" font-size="8" font-family="Inter,sans-serif">Indicador CEPEA</text>
+                    <rect x="185" y="15" width="8" height="3" rx="1" fill="#FFD600"/>
+                    <text x="197" y="19" fill="#FFD600" font-size="8" font-family="Inter,sans-serif">LTA (Tendência)</text>
+                    <rect x="290" y="15" width="8" height="3" rx="1" fill="#EF5350"/>
+                    <text x="302" y="19" fill="#EF5350" font-size="8" font-family="Inter,sans-serif">Suporte</text>
+                    <rect x="355" y="15" width="8" height="3" rx="1" fill="#66BB6A"/>
+                    <text x="367" y="19" fill="#66BB6A" font-size="8" font-family="Inter,sans-serif">Resistência</text>
+                </svg>
+            </div>
+            <div class="analysis-box">
+                <h4>🔍 Análise Técnica — Leitura Grafista</h4>
+                <p>O milho em março formou uma <strong>rally ascendente de 10 pregões</strong> (03/03 a 16/03), saindo de R$ 69,98 para a máxima de R$ 72,10 — valorização de <strong>+3,03%</strong>. A partir do dia 17/03, o mercado entrou em <strong>correção técnica</strong>, com destaque para a queda de -1,14% no dia 18/03 (maior recuo diário do mês), devolvendo parte dos ganhos.</p>
+                <p style="margin-top:10px;">Hoje (23/03) o indicador fechou em <strong>R$ 71,25</strong>, situando-se em zona intermediária entre o <strong>suporte em R$ 70,50</strong> (faixa de consolidação da 1ª quinzena) e a <strong>resistência em R$ 72,10</strong> (topo mensal). A LTA traçada desde o início do mês foi rompida, indicando que o momentum altista <strong>perdeu força</strong>. O padrão gráfico sugere <strong>consolidação lateral entre R$ 71,00 e R$ 72,10</strong> no curto prazo, com viés de leve correção. Para retomar alta, precisa romper R$ 72,10 com volume.</p>
+            </div>
+        </div>
+
+        <!-- COTAÇÕES REGIONAIS -->
+        <div class="section-title">
+            <div class="section-icon">🌽</div>
+            <h2>Cotações Regionais — <span>Mapa de Preços</span></h2>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">Preços por Região — Saca 60kg (Referência Março/26)</div>
+                <span class="badge badge-yellow">DISPARIDADE REGIONAL</span>
+            </div>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr><th>Região / Praça</th><th>Preço (R$/sc)</th><th>Perfil</th><th>Observação</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td style="color:var(--corn);font-weight:700;font-family:Inter,sans-serif;">SP Campinas (CEPEA)</td><td style="color:var(--corn);font-weight:700;">71,25</td><td>Consumo</td><td>Referência nacional</td></tr>
+                        <tr><td style="color:var(--text-secondary);font-family:Inter,sans-serif;">SP Capital</td><td>71,87</td><td>Consumo</td><td>Maior valor nominal</td></tr>
+                        <tr><td style="color:var(--text-secondary);font-family:Inter,sans-serif;">SP Sorocaba</td><td>68,16</td><td>Consumo</td><td>Abaixo da capital</td></tr>
+                        <tr><td style="color:var(--text-secondary);font-family:Inter,sans-serif;">PR Paranaguá</td><td>65,00</td><td>Porto/Export</td><td>Referência exportação</td></tr>
+                        <tr><td style="color:var(--text-secondary);font-family:Inter,sans-serif;">PR Maringá</td><td>60,00 – 61,00</td><td>Produção</td><td>Interior paranaense</td></tr>
+                        <tr><td style="color:var(--text-secondary);font-family:Inter,sans-serif;">RS Porto Alegre</td><td>67,00</td><td>Consumo</td><td>Colheita verão adiantada</td></tr>
+                        <tr><td style="color:var(--text-secondary);font-family:Inter,sans-serif;">GO Goiânia</td><td>58,00 – 62,00</td><td>Produção</td><td>Foco na safrinha</td></tr>
+                        <tr><td style="color:var(--text-secondary);font-family:Inter,sans-serif;">MT Sorriso</td><td style="color:var(--red);">42,50</td><td>Produção</td><td>Mínima nacional — frete pesa</td></tr>
+                        <tr><td style="color:var(--text-secondary);font-family:Inter,sans-serif;">MS Dourados</td><td>52,00 – 56,00</td><td>Produção</td><td>Logística intermediária</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="analysis-box">
+                <h4>📐 Leitura da Disparidade Regional</h4>
+                <p>A <strong>diferença entre a máxima (SP Capital R$ 71,87) e a mínima (MT Sorriso R$ 42,50)</strong> é de <strong>R$ 29,37/sc — ou 69%</strong>. Isso reflete o peso brutal do <strong>frete e logística</strong> no milho brasileiro. O produtor do Centro-Oeste, especialmente Mato Grosso, absorve um custo logístico que comprime margens mesmo com produtividade elevada. Regiões consumidoras (SP, PR porto, RS) sustentam prêmios pela demanda de ração animal (aves, suínos, bovinos) e etanol de milho.</p>
+            </div>
+        </div>
+
+        <!-- GRÁFICO: DISPARIDADE REGIONAL -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">Mapa de Preços — Barras Regionais (R$/sc 60kg)</div>
+                <span class="badge badge-orange">VISUAL COMPARATIVO</span>
+            </div>
+            <div class="chart-container">
+                <svg viewBox="0 0 800 280" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="barCorn" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#FFD600"/>
+                            <stop offset="100%" stop-color="#E65100"/>
+                        </linearGradient>
+                    </defs>
+
+                    <!-- Bars: base y=220, max height for 72 = 180. scale = 180/72 = 2.5 -->
+                    <!-- SP Capital 71.87: h=179.7 y=40.3 -->
+                    <rect x="60" y="40.3" width="65" height="179.7" rx="4" fill="url(#barCorn)" opacity="1"/>
+                    <text x="92.5" y="34" text-anchor="middle" fill="#FFD600" font-size="10" font-weight="700" font-family="JetBrains Mono,monospace">71,87</text>
+                    <text x="92.5" y="240" text-anchor="middle" fill="#FFE0B2" font-size="8" font-weight="600" font-family="Inter,sans-serif">SP Capital</text>
+
+                    <!-- CEPEA 71.25: h=178.1 y=41.9 -->
+                    <rect x="145" y="41.9" width="65" height="178.1" rx="4" fill="url(#barCorn)" opacity="0.9"/>
+                    <text x="177.5" y="35" text-anchor="middle" fill="#FFD600" font-size="10" font-weight="700" font-family="JetBrains Mono,monospace">71,25</text>
+                    <text x="177.5" y="240" text-anchor="middle" fill="#FFD600" font-size="8" font-weight="700" font-family="Inter,sans-serif">CEPEA ★</text>
+
+                    <!-- SP Sorocaba 68.16: h=170.4 y=49.6 -->
+                    <rect x="230" y="49.6" width="65" height="170.4" rx="4" fill="url(#barCorn)" opacity="0.8"/>
+                    <text x="262.5" y="43" text-anchor="middle" fill="#FFE0B2" font-size="10" font-weight="700" font-family="JetBrains Mono,monospace">68,16</text>
+                    <text x="262.5" y="240" text-anchor="middle" fill="#FFE0B2" font-size="8" font-weight="600" font-family="Inter,sans-serif">Sorocaba</text>
+
+                    <!-- RS POA 67: h=167.5 y=52.5 -->
+                    <rect x="315" y="52.5" width="65" height="167.5" rx="4" fill="url(#barCorn)" opacity="0.75"/>
+                    <text x="347.5" y="46" text-anchor="middle" fill="#FFE0B2" font-size="10" font-weight="700" font-family="JetBrains Mono,monospace">67,00</text>
+                    <text x="347.5" y="240" text-anchor="middle" fill="#FFE0B2" font-size="8" font-weight="600" font-family="Inter,sans-serif">RS POA</text>
+
+                    <!-- PR Paranaguá 65: h=162.5 y=57.5 -->
+                    <rect x="400" y="57.5" width="65" height="162.5" rx="4" fill="url(#barCorn)" opacity="0.65"/>
+                    <text x="432.5" y="51" text-anchor="middle" fill="#FFE0B2" font-size="10" font-weight="700" font-family="JetBrains Mono,monospace">65,00</text>
+                    <text x="432.5" y="240" text-anchor="middle" fill="#FFE0B2" font-size="8" font-weight="600" font-family="Inter,sans-serif">Paranaguá</text>
+
+                    <!-- PR Maringá 60.5: h=151.25 y=68.75 -->
+                    <rect x="485" y="68.75" width="65" height="151.25" rx="4" fill="url(#barCorn)" opacity="0.55"/>
+                    <text x="517.5" y="62" text-anchor="middle" fill="#FFE0B2" font-size="10" font-weight="700" font-family="JetBrains Mono,monospace">60,50</text>
+                    <text x="517.5" y="240" text-anchor="middle" fill="#FFE0B2" font-size="8" font-weight="600" font-family="Inter,sans-serif">Maringá</text>
+
+                    <!-- GO Goiânia 60: h=150 y=70 -->
+                    <rect x="570" y="70" width="65" height="150" rx="4" fill="url(#barCorn)" opacity="0.45"/>
+                    <text x="602.5" y="64" text-anchor="middle" fill="#FFE0B2" font-size="10" font-weight="700" font-family="JetBrains Mono,monospace">60,00</text>
+                    <text x="602.5" y="240" text-anchor="middle" fill="#FFE0B2" font-size="8" font-weight="600" font-family="Inter,sans-serif">Goiânia</text>
+
+                    <!-- MT Sorriso 42.5: h=106.25 y=113.75 -->
+                    <rect x="655" y="113.75" width="65" height="106.25" rx="4" fill="rgba(239,83,80,0.6)" opacity="0.9"/>
+                    <text x="687.5" y="107" text-anchor="middle" fill="#EF5350" font-size="10" font-weight="700" font-family="JetBrains Mono,monospace">42,50</text>
+                    <text x="687.5" y="240" text-anchor="middle" fill="#EF5350" font-size="8" font-weight="700" font-family="Inter,sans-serif">MT Sorriso</text>
+
+                    <text x="400" y="270" text-anchor="middle" fill="#8D7B6B" font-size="9" font-family="Inter,sans-serif">Preço da saca 60kg — Por praça (R$)</text>
+                </svg>
+            </div>
+        </div>
+
+        <!-- ANÁLISE FUNDAMENTALISTA -->
+        <div class="section-title">
+            <div class="section-icon">🧠</div>
+            <h2>Análise Fundamentalista — <span>Drivers do Mercado</span></h2>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">Fatores de Oferta, Demanda e Cenário Global</div>
+                <span class="badge badge-green">ANÁLISE INTEGRADA</span>
+            </div>
+
+            <div class="alert-box success">
+                <span class="alert-icon">🟢</span>
+                <div class="alert-content">
+                    <strong style="color:var(--green);">OFERTA RESTRITA NO SPOT — Vendedores firmes</strong>
+                    <p>A disponibilidade de milho para negociação imediata diminuiu significativamente. Produtores priorizam <strong>entregas de soja e semeadura da safrinha</strong>, retendo o milho. A disputa por fretes está acirrada, encarecendo o transporte. Apesar de estoques de passagem confortáveis (<strong>12,68 milhões de ton</strong> vs 1,88 mi de 2024/25 — Conab), o milho disponível no spot é escasso, sustentando preços acima de R$ 71/sc em Campinas.</p>
+                </div>
+            </div>
+
+            <div class="alert-box warning">
+                <span class="alert-icon">🟡</span>
+                <div class="alert-content">
+                    <strong style="color:var(--orange);">SAFRINHA COM ATRASO — Risco climático em foco</strong>
+                    <p>O plantio da safrinha alcançou <strong>85,5% da área</strong> (14/03), contra 89,6% em 2025 e média de 82,9% dos últimos 5 anos. O atraso na colheita da soja comprimiu a janela de plantio. Ainda restam <strong>1,3 milhão de hectares</strong> a serem semeados (vs 0,5 mi em 2025). A produção 2025/26 é estimada em <strong>133-138 milhões de ton</strong>, queda de ~2% — segunda maior da história, mas com produtividade caindo 4,54% (Imea). <strong>Risco de geada tardia e seca</strong> no desenvolvimento são fatores de atenção.</p>
+                </div>
+            </div>
+
+            <div class="alert-box info">
+                <span class="alert-icon">🔵</span>
+                <div class="alert-content">
+                    <strong style="color:var(--blue);">DEMANDA DOMÉSTICA FORTE — Ração + Etanol</strong>
+                    <p>O consumo interno está projetado em <strong>94,56 milhões de ton</strong>, puxado pela <strong>cadeia de proteínas animais</strong> (aves, suínos, bovinos) e pela expansão do <strong>etanol de milho</strong> (projeção de 9,9 bilhões de litros). A indústria de ração segue ativa na recomposição de estoques, disputando grão com exportadores. A demanda é estruturalmente crescente.</p>
+                </div>
+            </div>
+
+            <div class="alert-box success">
+                <span class="alert-icon">🌍</span>
+                <div class="alert-content">
+                    <strong style="color:var(--green);">EXPORTAÇÕES EM ALTA — Brasil ganha participação global</strong>
+                    <p>As exportações de milho em março/26 estão estimadas em <strong>697 mil toneladas</strong> (+47% vs mar/25 — ANEC). Para a safra 2025/26, a projeção é de <strong>43-46,5 milhões de ton</strong> exportadas, alta de 11,7% (Imea). Os EUA também embarcam forte (42,9 mi de ton desde set, +39% a/a), mas o atraso da safrinha brasileira pode apertar a oferta global no 2º semestre. USDA projeta produção mundial de <strong>1.297 mi de ton</strong> e estoques de 292,75 mi de ton.</p>
+                </div>
+            </div>
+
+            <div class="alert-box danger">
+                <span class="alert-icon">🔴</span>
+                <div class="alert-content">
+                    <strong style="color:var(--red);">CÂMBIO E LOGÍSTICA — Pressões cruzadas</strong>
+                    <p>O dólar a <strong>R$ 5,27 (-0,75%)</strong> prejudica a receita do exportador em reais. Por outro lado, o <strong>petróleo e combustíveis em alta</strong> encarecem fretes e custos de escoamento. O conflito no Oriente Médio e tensões no Estreito de Ormuz mantêm agentes em alerta sobre logística marítima. O Irã, importante comprador de milho brasileiro, adiciona <strong>risco geopolítico direto</strong> ao mercado.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- FATORES GEOPOLÍTICOS -->
+        <div class="section-title">
+            <div class="section-icon">🌍</div>
+            <h2>Radar Macro & Geopolítico — <span>Fique de Olho</span></h2>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">Fatores Macroeconômicos e Geopolíticos — Milho</div>
+                <span class="badge badge-red">⚠️ MONITORAR</span>
+            </div>
+
+            <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:20px;">
+                <div class="geo-pill"><span class="flag">🇺🇸🇮🇷</span> <span style="color:var(--text-secondary);">Tensão EUA-Irã: Irã é comprador de milho BR — risco direto</span></div>
+                <div class="geo-pill"><span class="flag">⛽</span> <span style="color:var(--text-secondary);">Estreito de Ormuz: ameaça à rota logística marítima</span></div>
+                <div class="geo-pill"><span class="flag">🛢️</span> <span style="color:var(--text-secondary);">Petróleo volátil: impacto nos fretes e custos de produção</span></div>
+                <div class="geo-pill"><span class="flag">💵</span> <span style="color:var(--text-secondary);">Dólar fraco (R$ 5,27): comprime margem do exportador</span></div>
+                <div class="geo-pill"><span class="flag">🇨🇳</span> <span style="color:var(--text-secondary);">China importou +207,9% de milho a/a — demanda explosiva</span></div>
+                <div class="geo-pill"><span class="flag">🌧️</span> <span style="color:var(--text-secondary);">La Niña: risco de seca para safrinha no 2º semestre</span></div>
+                <div class="geo-pill"><span class="flag">🇺🇸</span> <span style="color:var(--text-secondary);">EUA: CBOT firme, exportações +39% a/a sustentam preços</span></div>
+                <div class="geo-pill"><span class="flag">🏭</span> <span style="color:var(--text-secondary);">Ureia próxima de US$ 700/ton — custo nitrogenado dispara</span></div>
+            </div>
+
+            <div class="analysis-box">
+                <h4>🔎 Análise Macro-Geopolítica para o Milho</h4>
+                <p><strong>1) Irã e Oriente Médio:</strong> O Irã é um <strong>comprador relevante de milho brasileiro</strong>. Qualquer escalada no conflito ou sanções adicionais pode <strong>interromper embarques</strong> e afetar o programa de exportações. O fechamento do Estreito de Ormuz impactaria rotas marítimas e seguros, encarecendo fretes.</p>
+                <p style="margin-top:8px;"><strong>2) Custo de Produção:</strong> A ureia (principal insumo nitrogenado para milho) está próxima de <strong>US$ 700/ton</strong> — patamar elevadíssimo. Isso pressiona o custo da safrinha e pode desincentivar investimento em tecnologia e adubação, afetando produtividade futura.</p>
+                <p style="margin-top:8px;"><strong>3) China e demanda global:</strong> As importações chinesas de milho cresceram <strong>207,9% a/a</strong> — sinal de estocagem estratégica. Combinado com a safra argentina em queda (-1 mi ton — USDA), o balanço global fica mais justo e sustenta preços em patamares firmes.</p>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- CENÁRIOS 2 DIAS -->
+        <div class="section-title">
+            <div class="section-icon">🔮</div>
+            <h2>Projeção — <span>Terça (24/03) e Quarta (25/03)</span></h2>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">Cenários para os Próximos 2 Dias — Milho</div>
+                <span class="badge badge-yellow">PROJEÇÃO RURAL IN</span>
+            </div>
+
+            <div class="scenario-card neutral">
+                <div class="scenario-header">
+                    <span class="scenario-prob">50%</span>
+                    <span class="scenario-label" style="color:var(--yellow);">🟡 CENÁRIO BASE — Lateralização em zona de consolidação</span>
+                </div>
+                <p class="scenario-desc">O mercado perdeu o momentum altista após o topo de R$ 72,10 (16/03) e entrou em correção. Os últimos 3 pregões mostram variações pequenas (-0,17%, -0,36%, +0,60%), indicando <strong>equilíbrio entre compradores e vendedores</strong>. É provável que o milho oscile lateralmente, com compradores tentando recompor estoques e vendedores ainda focados na soja e safrinha. Fretes caros limitam movimentação. Cenário de "espera".</p>
+                <div class="scenario-range">📍 Faixa projetada: R$ 70,80 – R$ 71,60/sc</div>
+            </div>
+
+            <div class="scenario-card bullish">
+                <div class="scenario-header">
+                    <span class="scenario-prob">30%</span>
+                    <span class="scenario-label" style="color:var(--green);">🟢 CENÁRIO ALTISTA — Retomada rumo a R$ 72</span>
+                </div>
+                <p class="scenario-desc">Se a oferta no spot continuar restrita e a <strong>demanda da indústria de ração</strong> se intensificar (típico de final de mês com reposição de estoques), o milho pode retomar trajetória de alta. Uma eventual <strong>piora nas previsões climáticas</strong> para a safrinha (seca ou geada) funcionaria como gatilho altista, assim como qualquer alta no dólar ou escalada geopolítica que impulsione commodities.</p>
+                <div class="scenario-range">📍 Faixa projetada: R$ 71,50 – R$ 72,20/sc</div>
+            </div>
+
+            <div class="scenario-card bearish">
+                <div class="scenario-header">
+                    <span class="scenario-prob">20%</span>
+                    <span class="scenario-label" style="color:var(--red);">🔴 CENÁRIO DE BAIXA — Correção para R$ 70,50</span>
+                </div>
+                <p class="scenario-desc">O avanço da colheita da safra verão no Sul (preços já em queda na região) pode trazer <strong>maior oferta ao mercado</strong>. Se o dólar continuar caindo (abaixo de R$ 5,20), a atratividade da exportação diminui e mais milho pode ser direcionado ao mercado interno, pressionando preços para baixo. Os estoques de passagem elevados (12,68 mi ton) servem como "colchão" e limitam a urgência compradora.</p>
+                <div class="scenario-range">📍 Faixa projetada: R$ 70,30 – R$ 71,00/sc</div>
+            </div>
+
+            <div class="analysis-box">
+                <h4>💡 Recomendação Estratégica ao Produtor — Milho</h4>
+                <p><strong>Para quem tem milho safra verão armazenado:</strong> O patamar acima de R$ 71/sc em Campinas é historicamente atrativo para o período. Considere <strong>fixar entre 30-50%</strong> das vendas nos níveis atuais, especialmente se sua operação está no Sudeste/PR. A chegada da safrinha (a partir de junho) tende a pressionar preços sazonalmente.</p>
+                <p style="margin-top:8px;"><strong>Para quem está plantando safrinha:</strong> O custo de produção com ureia próxima de US$ 700/ton exige <strong>planejamento rigoroso</strong>. Faça a conta: custo/ha + frete vs preço futuro da B3 no vencimento alvo (jul/set). Se a conta fechar com margem mínima de 10%, considere travar hedge na B3.</p>
+                <p style="margin-top:8px;"><strong>Atenção ao clima:</strong> A safrinha 2026 é a variável mais sensível. Monitorar previsões para MT e PR nos próximos 30-60 dias é essencial. Qualquer sinal de seca prolongada ou geada antecipada pode <strong>catapultar os preços</strong>.</p>
+            </div>
+        </div>
+
+        <!-- RESUMO EXECUTIVO -->
+        <div class="section-title">
+            <div class="section-icon">📋</div>
+            <h2>Resumo Executivo — <span>Quadro Sintético</span></h2>
+        </div>
+
+        <div class="grid-3" style="margin-bottom:24px;">
+            <div class="mini-card" style="border-color:var(--yellow);">
+                <div class="mini-card-label">Tendência Curto Prazo</div>
+                <div class="mini-card-value" style="color:var(--yellow);">LATERAL</div>
+                <div class="mini-card-var" style="color:var(--yellow);">⬌ Consolidação</div>
+            </div>
+            <div class="mini-card" style="border-color:var(--green);">
+                <div class="mini-card-label">Tendência Médio Prazo</div>
+                <div class="mini-card-value" style="color:var(--green);">ALTISTA</div>
+                <div class="mini-card-var up">⬆ Oferta restrita</div>
+            </div>
+            <div class="mini-card" style="border-color:var(--orange);">
+                <div class="mini-card-label">Risco Chave</div>
+                <div class="mini-card-value" style="color:var(--orange);">CLIMA</div>
+                <div class="mini-card-var" style="color:var(--orange);">🌧️ Safrinha</div>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="mini-card">
+                <div class="mini-card-label">Suporte Técnico</div>
+                <div class="mini-card-value" style="color:var(--red);">R$ 70,50/sc</div>
+            </div>
+            <div class="mini-card">
+                <div class="mini-card-label">Resistência Técnica</div>
+                <div class="mini-card-value" style="color:var(--green);">R$ 72,10/sc</div>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<!-- FOOTER -->
+<footer class="footer">
+    <div class="container">
+        <div class="footer-content">
+            <div class="footer-author">
+                <p style="font-size:0.7rem;color:var(--corn);font-weight:700;margin-bottom:10px;">ANÁLISE E CONSTRUÇÃO</p>
+                <h3>Dr. Sidney Souza</h3>
+                <p class="role">Economista Agrícola</p>
+                <p class="role">Estrategista Econômico do Produtor</p>
+                <p class="sub-role">Especialista em economia da fazenda e gestão de risco no agro</p>
+                <p class="sub-role" style="color:var(--corn);font-weight:600;font-style:italic;">"Transformamos dados da fazenda em decisões econômicas"</p>
+                <p class="sub-role" style="color:var(--text-secondary);">"Ajudamos produtores a entender se o mercado sustenta seu negócio"</p>
+                <div class="footer-contact-item"><span class="icon">📧</span><span>sidneyagro@gmail.com</span></div>
+                <div class="footer-contact-item"><span class="icon">📱</span><span>(64) 9 9226-6886</span></div>
+                <div class="footer-social">
+                    <span class="social-tag">📍 @ruralin.ai</span>
+                    <span class="social-tag">📍 @sidneyagrosa</span>
+                </div>
+            </div>
+            <div class="footer-disclaimer">
+                <div style="margin-bottom:16px;">
+                    <svg viewBox="0 0 120 50" xmlns="http://www.w3.org/2000/svg" width="120">
+                        <rect width="120" height="50" rx="8" fill="#E65100"/>
+                        <text x="60" y="22" text-anchor="middle" font-family="Inter,sans-serif" font-size="12" font-weight="900" fill="#FFD600">RURAL</text>
+                        <text x="60" y="38" text-anchor="middle" font-family="Inter,sans-serif" font-size="14" font-weight="900" fill="white">IN</text>
+                        <line x1="20" y1="44" x2="100" y2="44" stroke="#FFD600" stroke-width="1.5"/>
+                    </svg>
+                </div>
+                <p><strong style="color:var(--text-secondary);">Aviso Legal:</strong> Este informativo tem caráter educacional e analítico. Não constitui recomendação de investimento. As projeções são baseadas em dados públicos e metodologia proprietária. Decisões de comercialização são de exclusiva responsabilidade do produtor.</p>
+                <p style="margin-top:8px;"><strong style="color:var(--text-secondary);">Fontes:</strong> CEPEA/Esalq, B3, Conab, USDA, ANEC, Imea, AgRural, Scot Consultoria, Agrifatto, Hedgepoint, Notícias Agrícolas, Globo Rural, Portal DBO, FarmNews, SunSirs.</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p class="footer-motto">🌽 Transformamos dados da fazenda em decisões econômicas</p>
+            <p>© 2026 Rural IN — Inteligência Agro | Todos os direitos reservados</p>
+            <p style="margin-top:4px;">Radar Agro Milho — Edição 23/03/2026 — Segunda-feira</p>
+        </div>
+    </div>
+</footer>
+
+</body>
+</html>
